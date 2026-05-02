@@ -44,9 +44,9 @@ Inspect the manifest from the extracted `package.zip`. Fields to check:
 ## 5. Code Quality (plugins) — check in [repo]
 
 - [ ] **Config storage**: Use `saveData()` / `loadData()` for plugin configuration, unless the file genuinely needs to be stored outside the petal directory
-- [ ] **Uninstall cleanup**: Must call `removeData()` in the `uninstall` lifecycle to delete config files
+- [ ] **Uninstall cleanup**: Must call `removeData()` in the `uninstall()` method — NOT in `onunload()`. The lifecycle is: disable/reload → only `onunload()` fires; full uninstall → `onunload()` fires first, then `uninstall()` fires. Putting `removeData()` in `onunload()` would delete config on every disable, losing user settings.
 - [ ] **No save on unload/install**: Must NOT save data during `onunload` or `uninstall` (causes sync conflicts)
-- [ ] **Unload → uninstall flow**: If the code appears to not understand this lifecycle order, flag it
+- [ ] **Lifecycle understanding**: `onunload()` is for releasing runtime resources (event listeners, IPC handlers, DOM elements). `uninstall()` is for persistent cleanup (removing stored data). If the plugin confuses these responsibilities, flag it.
 - [ ] **Constants**: Use named constants instead of hardcoded string literals
 - [ ] **Avoid re-reading config**: Don't call `loadData()` (which internally calls `getFile`) repeatedly — read once, cache in a variable, write with `putFile` when needed
 - [ ] **Logging**: Outside of lifecycle functions, only log on errors. `console.log` is acceptable within lifecycle functions (onload, onunload, etc.)

@@ -42,6 +42,40 @@ These are high-risk and only the user should perform them manually:
 - Enabling/disabling/uninstalling the package to verify cleanup
 - Any testing that involves running the package's JavaScript/TypeScript
 
+## SiYuan Plugin Lifecycle Reference
+
+Understanding the Plugin class lifecycle is essential for reviewing code quality. The lifecycle is defined in `app/src/plugin/index.ts` and orchestrated by `app/src/plugin/loader.ts` and `app/src/plugin/uninstall.ts`.
+
+### Lifecycle Methods
+
+| Method | When Called | Purpose |
+|---|---|---|
+| `onload()` | Plugin loaded/installed | Initialize: register event listeners, IPC handlers, commands, load config |
+| `onLayoutReady()` | After layout finishes loading | Re-attach UI elements (top bar icons, docks, status bar items) |
+| `onunload()` | **Both** disable and full uninstall | Release runtime resources: remove event listeners, IPC handlers, DOM elements |
+| `uninstall()` | **Only** full uninstall (after `onunload()`) | Persistent cleanup: call `removeData()` to delete stored config |
+| `onDataChanged()` | Plugin's storage data changed externally | Reload plugin to apply synced config changes |
+
+Note: There is **no** `onuninstall()` method. The method is named `uninstall()`.
+
+### Lifecycle Flow
+
+```
+Install:            onload() → onLayoutReady()
+Disable:            onunload()
+Reload / Update:    onunload() → onload() → onLayoutReady()
+Full Uninstall:     onunload() → uninstall()
+Data Synced:        onDataChanged() → internal reload
+```
+
+Key distinction:
+- **`onunload()`**: fires on disable, reload, and uninstall — use only for **runtime** cleanup (event listeners, IPC, DOM)
+- **`uninstall()`**: fires only on full uninstall — use for **persistent** cleanup (`removeData()`)
+
+Do NOT put `removeData()` in `onunload()`, as that would delete user config on every plugin disable/update, losing settings.
+
+The framework handles these automatically during uninstall: plugin tabs, top bar icons, status bar icons, docks, inline comments, SVG icons, CSS styles, and toolbar updates. Plugins only need to clean up their own resources.
+
 ## Temp Directory
 
 All per-review temporary files go under `/tmp/bazaar-review/<PR>/<date>-<short-commit>-<release-id>/`. The directory name uses three components:
@@ -229,8 +263,8 @@ find "$REPO_ROOT" -type f -not -path '*/node_modules/*' -not -path '*/.git/*' | 
 ```
 
 For plugins, focus code inspection on these areas:
-- **Entry point**: `src/index.ts` or `src/index.js` — lifecycle hooks, IPC registration, command registration
-- **Config management**: Look for `saveData`/`loadData`/`removeData` patterns across all source files
+- **Lifecycle methods**: Check `onload()`, `onunload()`, `uninstall()`. `onunload()` must remove all event listeners/IPC handlers. `uninstall()` (if present) must call `removeData()` for stored config. `removeData()` must NOT appear in `onunload()` — see lifecycle reference above.
+- **Config management**: Look for `saveData`/`loadData`/`removeData` patterns across all source files. `loadData()` should be called once and cached; `saveData()` should not be in `onunload`.
 - **i18n files**: Check all locale JSON files for balanced keys and correct language
 - **Styles**: Check SCSS/CSS files for leftover template styles (`.plugin-sample`)
 - **Path handling**: All file paths must use `/`
@@ -278,8 +312,8 @@ Output the review in this format:
 ### Needs Manual Verification
 - [ ] Install and test <specific feature>
 - [ ] Check <specific behavior>
-- [ ] Verify cleanup after uninstall
-- [ ] Verify cleanup after disable
+- [ ] Verify `uninstall()` cleanup (config deleted after full uninstall)
+- [ ] Verify `onunload()` cleanup (listeners removed after disable)
 ```
 
 Issue description rules:
@@ -355,8 +389,8 @@ Remind the reviewer that these items require actual installation:
 
 - Functional testing of all features
 - UI layout and styling checks
-- Uninstall cleanup (config files deleted?)
-- Disable cleanup (components, listeners removed?)
+- Uninstall cleanup — does `uninstall()` delete stored config? (only fires on full uninstall, not disable)
+- Disable/reload cleanup — does `onunload()` properly remove event listeners, IPC handlers, DOM elements? (fires on both disable and uninstall)
 - Browser environment compatibility (if frontends include `browser-desktop`)
 
 ### Step 11: Clean up temp files
