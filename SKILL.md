@@ -331,7 +331,28 @@ After the review report is complete, write the review conclusions to a file in t
 
 **If the developer does NOT speak Chinese:** write the file with both Chinese and an English translation appended at the end, separated by a horizontal rule. The English section should mirror the Chinese content exactly.
 
-Template for non-Chinese developer:
+Template for **Chinese-speaking** developer (Chinese only, no English, no separator):
+
+```bash
+cat > /tmp/bazaar-review/<PR>/<vdir>/review.md << 'REVIEW_EOF'
+## 初步审核
+
+以下是 AI 的审核结论，请开发者确认并修复之后回复，然后维护者会进行人工审核。
+
+### 版本: <tag> (commit: <commit_short>)
+
+### 发现的问题
+<list each issue with specific fix>
+
+### 需要维护者人工验证
+<list items that require manual installation/testing>
+
+### 检查通过
+<list each item that passed>
+REVIEW_EOF
+```
+
+Template for **non-Chinese** developer (Chinese first, then `---` separator, then English):
 
 ```bash
 cat > /tmp/bazaar-review/<PR>/<vdir>/review.md << 'REVIEW_EOF'
@@ -367,12 +388,13 @@ The following is the AI's review conclusion. Please confirm and fix the issues b
 ### Passed
 <list each item that passed>
 REVIEW_EOF
-
-# Open with default text editor
-explorer.exe "$(cygpath -w /tmp/bazaar-review/<PR>/<vdir>/review.md)" 2>/dev/null || open /tmp/bazaar-review/<PR>/<vdir>/review.md 2>/dev/null || xdg-open /tmp/bazaar-review/<PR>/<vdir>/review.md
 ```
 
-For a Chinese-speaking developer, use the same Chinese section above but **omit the English section** (everything from `---` onward).
+After writing the file, open it with the default text editor:
+
+```bash
+explorer.exe "$(cygpath -w /tmp/bazaar-review/<PR>/<vdir>/review.md)" 2>/dev/null || open /tmp/bazaar-review/<PR>/<vdir>/review.md 2>/dev/null || xdg-open /tmp/bazaar-review/<PR>/<vdir>/review.md
+```
 
 The Chinese section structure:
 - **初步审核**：二级标题，紧跟一句说明
