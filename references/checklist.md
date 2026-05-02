@@ -1,0 +1,94 @@
+# Review Checklist
+
+Each item is tagged with **[zip]** (check against the extracted package.zip), **[repo]** (check against the repository source), or **[both]**.
+
+## 1. Metadata (manifest JSON) — check in [zip]
+
+Inspect the manifest from the extracted `package.zip`. Fields to check:
+
+- [ ] **`disabledInPublish`** (plugins): Must be `true` if:
+  - Data stored via `saveData()` in petal may contain sensitive information, OR
+  - The plugin uses kernel write APIs without publish-specific handling
+- [ ] **`funding`**: Delete if empty (no sub-fields) or if `custom` is the template default `["https://ld246.com/sponsor"]`
+- [ ] **`keywords`**: Must NOT contain `"siyuan"` (don't reference the Siyuan brand name)
+- [ ] **Redundant locale fields**: Delete any locale field whose value is identical to `"default"`
+- [ ] **Unused `i18n`**: Delete the `i18n` field if no i18n files are actually used
+- [ ] **`frontends`**: Set to `["all"]` only if the package actually supports all frontends (desktop, browser-desktop, mobile)
+- [ ] **`backends`**: Set to `["all"]` only if the package actually supports all backends (windows, linux, darwin, docker, android, ios)
+- [ ] **`name`**: Must match the repository name exactly
+- [ ] **`url`**: Must be the correct GitHub repository URL (`https://github.com/owner/repo`)
+- [ ] **`readme`**: The filenames listed must match actual README files present in the zip
+- [ ] **`displayName`**: Must NOT contain the text `Siyuan` (don't reference the brand name). The `description` field is exempt from this rule.
+
+## 2. Icon & Preview — check in [zip]
+
+- [ ] **`icon.png`**: File size must be < 20KB (dimensions 160x160 are recommended but not enforced)
+- [ ] **`preview.png`**: File size must be < 200KB (dimensions 1024x768 are recommended but not enforced)
+- [ ] **Icon choice**: Must NOT use SiYuan built-in icons — should use a custom SVG icon to avoid confusion with built-in features
+- [ ] **README**: Must NOT embed `preview.png` in README (Siyuan displays it separately in the marketplace)
+
+## 3. README Files — check in [zip]
+
+- [ ] **Relative links**: No relative-path links (images or URLs) — must use full GitHub raw URLs or stable image hosting URLs
+- [ ] **Language consistency**: If separate language files exist (e.g., `README.md` + `README_zh_CN.md`), the content of each must match the filename's language
+- [ ] **Filenames**: Must match the `readme` field in the manifest JSON
+- [ ] **No preview**: Preview image should not be embedded in README content
+
+## 4. LICENSE — check in [repo]
+
+- [ ] **Exists**: Repository must contain a LICENSE file
+- [ ] **Year**: Copyright year must be current/updated
+- [ ] **Copyright holder**: Must be the actual author (not a template placeholder)
+- [ ] **License type**: Must be an appropriate open source license
+
+## 5. Code Quality (plugins) — check in [repo]
+
+- [ ] **Config storage**: Use `saveData()` / `loadData()` for plugin configuration, unless the file genuinely needs to be stored outside the petal directory
+- [ ] **Uninstall cleanup**: Must call `removeData()` in the `uninstall` lifecycle to delete config files
+- [ ] **No save on unload/install**: Must NOT save data during `onunload` or `uninstall` (causes sync conflicts)
+- [ ] **Unload → uninstall flow**: If the code appears to not understand this lifecycle order, flag it
+- [ ] **Constants**: Use named constants instead of hardcoded string literals
+- [ ] **Avoid re-reading config**: Don't call `loadData()` (which internally calls `getFile`) repeatedly — read once, cache in a variable, write with `putFile` when needed
+- [ ] **Logging**: Outside of lifecycle functions, only log on errors. `console.log` is acceptable within lifecycle functions (onload, onunload, etc.)
+- [ ] **Batch saves**: Consecutive `saveConfig` calls should be merged into one
+- [ ] **Write frequency**: Don't write files at high frequency during Siyuan's runtime (can cause sync issues)
+- [ ] **Custom attributes**: Custom DOM attributes must use the `custom-` prefix (e.g., `custom-run-python-code`)
+- [ ] **IPC cleanup**: Execute corresponding `ipcMain.off` in `onunload` for every `ipcMain.on` registered
+- [ ] **Command registration**: Command keys must be in English; hotkey must use Siyuan format (e.g., `⌥⇧⌘A`), not raw key names like `Ctrl+Alt+C`
+- [ ] **Template styles**: `index.scss` must not contain leftover template styles like `.plugin-sample` — only the plugin's own styles
+- [ ] **Path separators**: All file paths in code must use forward slash `/`, not backslash `\`
+
+## 6. Package Zip — check in [zip]
+
+- [ ] **Filename**: Must be exactly `package.zip`
+- [ ] **Internal paths**: All file paths inside the zip must use forward slash `/`, not backslash `\`
+- [ ] **No extra files**: Don't include unused i18n folders, node_modules, `.git`, leftover template code, or other unnecessary files
+- [ ] **Build method**: Prefer webpack ZipPlugin or the official sample's `pnpm build`
+- [ ] **Manifest in zip matches manifest in repo**: The manifest JSON inside the zip should be consistent with the one in the repository (same fields, same values)
+
+## 7. i18n — check in [both]
+
+- [ ] **No mixing**: Different languages must not be mixed within the same locale (proper nouns excepted)
+- [ ] **Consistent messages**: If a locale is supported, UI messages shown to the user (errors, notifications) must be in that locale
+- [ ] **Files bundled**: If the manifest declares i18n support, the corresponding i18n JSON files must be present in the zip; if no i18n is used, don't bundle i18n files
+
+## 8. Theme-specific Rules
+
+- [ ] **No built-in fonts** [zip]: Don't bundle fonts that are already built into SiYuan
+- [ ] **Font changes documented** [zip]: If the theme changes interface fonts, mention this in the README
+- [ ] **Uninstall restore** [repo]: Must restore all interface changes when the theme is uninstalled
+
+## 9. Widget-specific Rules
+
+- [ ] **No config in `data/widgets`** [repo]: This is the install directory and gets overwritten on widget update. Save config to `data/storage` or use `setLocalStorageVal` instead
+
+## 10. Pre-existing CI Checks
+
+The following are checked automatically by CI — no need to re-verify unless the CI result looks suspicious:
+- Release exists with `package.zip` asset
+- Required files exist in the release: `icon.png`, `preview.png`, `README.md`, manifest JSON
+- Manifest has required fields: `name`, `version`, `author`, `url`
+- `name` is a valid directory name, matches repo name, and is unique across all package types
+- New themes do not contain `theme.js` (unless in the allowlist)
+- `icon.png` dimensions (CI requires 160x160)
+- `preview.png` dimensions (CI requires 1024x768)
