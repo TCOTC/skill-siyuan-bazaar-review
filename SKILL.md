@@ -282,11 +282,16 @@ Output the review in this format:
 - [ ] Verify cleanup after disable
 ```
 
-Be specific in issue descriptions — quote the exact field value, file path, or code line. When suggesting a replacement for a locale-specific field (e.g., `displayName.default` vs `displayName.zh_CN`), the suggestion must match the language of that field — don't suggest a Chinese replacement for an English field, or vice versa.
+Issue description rules:
+- **Quote once, then fix**: Only quote the problematic value once — when it's the issue itself. Don't repeat it in the fix suggestion (e.g., don't say "change X to Y instead of X" — "X" was already quoted).
+- **Locale suggestion matches the original value's language**: When suggesting a replacement for a locale-specific field, the suggestion must be in the same language as the current value — don't cross languages. The only exception is when the current value is already in the wrong language for its key (e.g., Chinese text in `en_US`), in which case suggest the correct language.
+- **Be specific**: quote the exact field value, file path, and line number.
 
 ### Step 9: Save review to file
 
 After the review report is complete, write the review conclusions to a file in the version directory.
+
+**IMPORTANT**: Use bash heredoc (`cat > ... << 'REVIEW_EOF'`) to write this file. Do NOT use the Write tool — it writes to a different filesystem than bash's `/tmp/`, causing `explorer.exe` to fail to find the file and open the Documents folder instead.
 
 **If the developer speaks Chinese (determined in Step 3):** write the file in Chinese only.
 
