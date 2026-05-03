@@ -263,14 +263,14 @@ find "$REPO_ROOT" -type f -not -path '*/node_modules/*' -not -path '*/.git/*' | 
 ```
 
 For plugins, focus code inspection on these areas:
-- **Lifecycle methods**: Check `onload()`, `onunload()`, `uninstall()`. `onunload()` must remove all event listeners/IPC handlers. `uninstall()` (if present) must call `removeData()` for stored config. `removeData()` must NOT appear in `onunload()` — see lifecycle reference above.
+
+- **Lifecycle methods**: Check `onload()`, `onunload()`, `uninstall()`. `uninstall()` (if present) must call `removeData()` for stored config. `removeData()` must NOT appear in `onunload()` — see lifecycle reference above.
+
+- **Cleanup completeness** (verify in code — do NOT delegate to manual verification): Cross-reference every resource registered in `onload()` against what's cleaned up in `onunload()`. If cleanup is missing, report as Issue Found; if complete, report as Passed. The SiYuan framework auto-removes plugin docks, tabs, top bar icons, status bar items, SVG icons, and CSS — do NOT flag these as missing. Focus on: EventBus listeners, global event listeners, IPC listeners (if the plugin uses `require("electron")`), timers, observers, and network connections. See `references/checklist.md` Section 5 for the full list.
+
 - **Config management**: Look for `saveData`/`loadData`/`removeData` patterns across all source files. `loadData()` should be called once and cached; `saveData()` should not be in `onunload`.
-- **i18n files**: Check all locale JSON files for balanced keys and correct language
-- **Styles**: Check SCSS/CSS files for leftover template styles (`.plugin-sample`)
-- **Path handling**: All file paths must use `/`
-- **Custom attributes**: Must use `custom-` prefix
-- **Logging patterns**: `console.log` acceptable only in lifecycle functions
-- **Constants**: Prefer named constants over hardcoded string literals
+
+- **Code standards**: Check styles (`.plugin-sample` remnants), path separators (must use `/`), custom attributes (`custom-` prefix), logging (only in lifecycle functions), and constants (named over literals). See `references/checklist.md` Section 5 for the complete list.
 
 Use `tail -n +1 /tmp/bazaar-review/<PR>/<vdir>/repo-source/<repo-root>/src/**/*.ts` or similar globs to read related source files in batches.
 
@@ -310,11 +310,13 @@ Output the review in this format:
 - item
 
 ### Needs Manual Verification
-- [ ] Install and test <specific feature>
-- [ ] Check <specific behavior>
-- [ ] Verify `uninstall()` cleanup (config deleted after full uninstall)
-- [ ] Verify `onunload()` cleanup (listeners removed after disable)
+- [ ] Install and test <specific feature that requires runtime interaction>
+- [ ] Verify UI layout on all declared frontends (desktop, mobile, browser-desktop)
+- [ ] Verify package works correctly after reload/update cycle
+- [ ] Verify no console errors during normal use
 ```
+
+**What belongs in "Needs Manual Verification"**: Only items that genuinely cannot be verified from source code alone — runtime behavior, visual appearance, cross-platform compatibility, errors that only surface during execution. If it can be checked by reading the source code (e.g., whether `onunload()` removes event listeners, whether `uninstall()` calls `removeData()`), verify it in code review and report it as Passed or Issue Found instead.
 
 Issue description rules:
 - **Quote once, then fix**: Only quote the problematic value once — when it's the issue itself. Don't repeat it in the fix suggestion (e.g., don't say "change X to Y instead of X" — "X" was already quoted).
@@ -407,13 +409,12 @@ The English section mirrors the same structure with equivalent headings and cont
 
 ### Step 10: Manual verification
 
-Remind the reviewer that these items require actual installation:
+Remind the reviewer of items that require actual installation (only things that cannot be verified from source code):
 
-- Functional testing of all features
-- UI layout and styling checks
-- Uninstall cleanup — does `uninstall()` delete stored config? (only fires on full uninstall, not disable)
-- Disable/reload cleanup — does `onunload()` properly remove event listeners, IPC handlers, DOM elements? (fires on both disable and uninstall)
+- Functional testing of all declared features
+- UI layout and styling checks across all declared frontends
 - Browser environment compatibility (if frontends include `browser-desktop`)
+- Any behavior that depends on SiYuan runtime state (e.g., data sync, multi-window)
 
 ### Step 11: Clean up temp files
 
