@@ -29,7 +29,13 @@ Inspect the manifest from the extracted `package.zip`. Fields to check:
 
 ## 3. README Files — check in [zip]
 
-- [ ] **Relative links**: No relative-path links (images or URLs) — must use full GitHub raw URLs or stable image hosting URLs
+- [ ] **Relative links**: No relative-path links. Use `grep -nE '\[[^]]+\]\([^)]+\)' README*.md | grep -v 'https\?://' | grep -v 'mailto:'` to detect them. Common patterns that are issues:
+  - `[text](file.md)` — cross-file links (e.g., `[English](README.md)`, `[中文](README_zh_CN.md)`)
+  - `[text](./path/doc.md)` or `[text](../file)` — relative directory links
+  - `![alt](./image.png)` or `![alt](image.png)` — relative image links
+  - `[text](#anchor)` — same-page anchor links
+  - Any link whose destination does not start with `https://` or `http://` is an issue — only `mailto:` is exempt
+  - Fixed links should use absolute URLs (GitHub raw, CDN, or stable image hosting)
 - [ ] **Language consistency**: If separate language files exist (e.g., `README.md` + `README_zh_CN.md`), the content of each must match the filename's language
 - [ ] **Filenames**: Must match the `readme` field in the manifest JSON
 - [ ] **No preview**: Preview image should not be embedded in README content

@@ -211,7 +211,14 @@ Then inspect the extracted contents as text:
 - **Manifest JSON** (e.g., `plugin.json`): check all fields per the metadata checklist
 - **`icon.png`**: actual file size in KB (`wc -c <file>` or `ls -lh`)
 - **`preview.png`**: actual file size in KB
-- **README files**: check for relative-path links/images, embedded preview.png
+- **README files**: scan for relative-path links and embedded preview.png.
+  Relative-path links (e.g., `[text](./doc.md)`, `![img](image.png)`) have undefined behavior — SiYuan may handle them differently in future versions, so they are not allowed.
+  Run this to detect relative Markdown links (portable, works on macOS/Linux/Windows):
+  ```bash
+  grep -nE '\[[^]]+\]\([^)]+\)' README*.md | grep -v 'https\?://' | grep -v 'mailto:'
+  ```
+  This catches: `[text](README.md)`, `[text](./path/doc.md)`, `![alt](image.png)`, `[..](../file)`, `[text](#anchor)`, language-switch links like `[English](README.md)` / `[中文](README_zh_CN.md)`, etc.
+  Any match is an issue — use absolute `https://` URLs instead (only `mailto:` links are exempt).
 - **Path separators**: all paths inside the zip must use `/`, not `\`
 - **Unnecessary files**: look for `node_modules`, `.git`, unused i18n folders, leftover template files
 - **i18n files**: if present, check content matches the declared locales in the manifest
