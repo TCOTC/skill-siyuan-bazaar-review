@@ -67,6 +67,7 @@ Inspect the manifest from the extracted `package.zip`. Fields to check:
 - [ ] **Network cleanup**: Any WebSocket, EventSource, or persistent network connections must be closed in `onunload()`
 - [ ] **Command registration**: Command keys must be in English; hotkey must use Siyuan format (e.g., `⌥⇧⌘A`), not raw key names like `Ctrl+Alt+C`
 - [ ] **Template styles**: `index.scss` must not contain leftover template styles like `.plugin-sample` — only the plugin's own styles
+- [ ] **No `window.location.reload()`**: Must NOT call `window.location.reload()` to reload the UI. Use `fetch('/api/ui/reloadUI')` instead. `window.location.reload()` causes a full browser reload and loses application state; `/api/ui/reloadUI` can automatically save SiYuan's layout information. Detect with `grep -rn 'location\.reload'` or `grep -rn 'window\.location'` on the source.
 - [ ] **Path separators**: All file paths in code must use forward slash `/`, not backslash `\`
 
 ## 6. Package Zip — check in [zip]

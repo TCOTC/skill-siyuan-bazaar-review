@@ -277,7 +277,7 @@ For plugins, focus code inspection on these areas:
 
 - **Config management**: Look for `saveData`/`loadData`/`removeData` patterns across all source files. `loadData()` should be called once and cached; `saveData()` should not be in `onunload`.
 
-- **Code standards**: Check styles (`.plugin-sample` remnants), path separators (must use `/`), custom attributes (`custom-` prefix), logging (only in lifecycle functions), and constants (named over literals). See `references/checklist.md` Section 5 for the complete list.
+- **Code standards**: Check styles (`.plugin-sample` remnants), path separators (must use `/`), custom attributes (`custom-` prefix), logging (only in lifecycle functions), constants (named over literals), and `window.location.reload()` (must use `/api/ui/reloadUI` instead). See `references/checklist.md` Section 5 for the complete list.
 
 Use `tail -n +1 /tmp/bazaar-review/<PR>/<vdir>/repo-source/<repo-root>/src/**/*.ts` or similar globs to read related source files in batches.
 
