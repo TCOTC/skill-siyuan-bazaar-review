@@ -12,7 +12,7 @@ Inspect the manifest from the extracted `package.zip`. Fields to check:
 - [ ] **`funding`**: Delete if empty (no sub-fields) or if `custom` is the template default `["https://ld246.com/sponsor"]`
 - [ ] **`keywords`**: Must NOT contain `"siyuan"` (don't reference the Siyuan brand name)
 - [ ] **Redundant locale fields**: Delete any locale field whose value is identical to `"default"`
-- [ ] **Unused `i18n`**: Delete the `i18n` field if no i18n files are actually used
+- [ ] **No `i18n` field**: The `i18n` field is not part of the plugin.json schema. The framework auto-loads i18n files from the `i18n/` directory and exposes them as `this.i18n`. If an `i18n` field appears in plugin.json, it should be removed — it's not needed for `this.i18n` to work
 - [ ] **`frontends`**: Set to `["all"]` only if the package actually supports all frontends (desktop, browser-desktop, mobile)
 - [ ] **`backends`**: Set to `["all"]` only if the package actually supports all backends (windows, linux, darwin, docker, android, ios)
 - [ ] **`name`**: Must match the repository name exactly
@@ -82,7 +82,7 @@ Inspect the manifest from the extracted `package.zip`. Fields to check:
 
 - [ ] **No mixing**: Different languages must not be mixed within the same locale (proper nouns excepted)
 - [ ] **Consistent messages**: If a locale is supported, UI messages shown to the user (errors, notifications) must be in that locale
-- [ ] **Files bundled**: If the manifest declares i18n support, the corresponding i18n JSON files must be present in the zip; if no i18n is used, don't bundle i18n files
+- [ ] **Files bundled**: If the plugin uses `this.i18n` in code, the corresponding i18n JSON files must be present in the `i18n/` directory inside the zip. The framework auto-loads them — no `plugin.json` field is needed. If the plugin does not use i18n, don't bundle an `i18n/` directory
 
 ## 8. Theme-specific Rules
 

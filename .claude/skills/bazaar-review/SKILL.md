@@ -221,7 +221,7 @@ Then inspect the extracted contents as text:
   Any match is an issue — use absolute `https://` URLs instead (only `mailto:` links are exempt).
 - **Path separators**: all paths inside the zip must use `/`, not `\`
 - **Unnecessary files**: look for `node_modules`, `.git`, unused i18n folders, leftover template files
-- **i18n files**: if present, check content matches the declared locales in the manifest
+- **i18n files**: if present in the `i18n/` directory, check that each file's content matches its locale language (no mixing). The framework auto-loads these files — no `i18n` field in plugin.json is needed. The set of i18n locales is independent from the `displayName`/`description`/`readme` locale keys in plugin.json
 
 ### Step 6: Inspect the repository (the source code)
 
