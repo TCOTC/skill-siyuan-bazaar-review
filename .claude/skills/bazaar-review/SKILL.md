@@ -74,7 +74,7 @@ Key distinction:
 
 Do NOT put `removeData()` in `onunload()`, as that would delete user config on every plugin disable/update, losing settings.
 
-The framework handles these automatically during uninstall: plugin tabs, top bar icons, status bar icons, docks, inline comments, SVG icons, CSS styles, and toolbar updates. Plugins only need to clean up their own resources.
+The framework handles these automatically during uninstall: plugin tabs, top bar icons, status bar icons, docks, inline comments, SVG icons, CSS styles, toolbar updates, and registered commands (via `addCommand()`). Plugins only need to clean up their own resources.
 
 ## Temp Directory
 
@@ -273,7 +273,7 @@ For plugins, focus code inspection on these areas:
 
 - **Lifecycle methods**: Check `onload()`, `onunload()`, `uninstall()`. `uninstall()` (if present) must call `removeData()` for stored config. `removeData()` must NOT appear in `onunload()` — see lifecycle reference above.
 
-- **Cleanup completeness** (verify in code — do NOT delegate to manual verification): Cross-reference every resource registered in `onload()` against what's cleaned up in `onunload()`. If cleanup is missing, report as Issue Found; if complete, report as Passed. The SiYuan framework auto-removes plugin docks, tabs, top bar icons, status bar items, SVG icons, and CSS — do NOT flag these as missing. Focus on: EventBus listeners, global event listeners, IPC listeners (if the plugin uses `require("electron")`), timers, observers, and network connections. See `references/checklist.md` Section 5 for the full list.
+- **Cleanup completeness** (verify in code — do NOT delegate to manual verification): Cross-reference every resource registered in `onload()` against what's cleaned up in `onunload()`. If cleanup is missing, report as Issue Found; if complete, report as Passed. The SiYuan framework auto-removes plugin docks, tabs, top bar icons, status bar items, SVG icons, CSS, and registered commands (via `addCommand()`) — do NOT flag these as missing. Focus on: EventBus listeners, global event listeners, IPC listeners (if the plugin uses `require("electron")`), timers, observers, and network connections. See `references/checklist.md` Section 5 for the full list.
 
 - **Config management**: Look for `saveData`/`loadData`/`removeData` patterns across all source files. `loadData()` should be called once and cached; `saveData()` should not be in `onunload`.
 

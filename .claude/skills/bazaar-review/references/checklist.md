@@ -52,7 +52,7 @@ Inspect the manifest from the extracted `package.zip`. Fields to check:
 - [ ] **Config storage**: Use `saveData()` / `loadData()` for plugin configuration, unless the file genuinely needs to be stored outside the petal directory
 - [ ] **Uninstall cleanup**: Must call `removeData()` in the `uninstall()` method — NOT in `onunload()`. The lifecycle is: disable/reload → only `onunload()` fires; full uninstall → `onunload()` fires first, then `uninstall()` fires. Putting `removeData()` in `onunload()` would delete config on every disable, losing user settings.
 - [ ] **No save on unload/install**: Must NOT save data during `onunload` or `uninstall` (causes sync conflicts)
-- [ ] **Lifecycle understanding**: `onunload()` is for releasing runtime resources (event bus listeners, timers, observers, global event listeners, network connections). `uninstall()` is for persistent cleanup (removing stored data). The framework auto-removes docks, tabs, top bar icons, status bar items, SVG icons, and CSS — the plugin only needs to clean up what it manually created outside framework APIs. If the plugin confuses these responsibilities, flag it.
+- [ ] **Lifecycle understanding**: `onunload()` is for releasing runtime resources (event bus listeners, timers, observers, global event listeners, network connections). `uninstall()` is for persistent cleanup (removing stored data). The framework auto-removes docks, tabs, top bar icons, status bar items, SVG icons, CSS, and registered commands — the plugin only needs to clean up what it manually created outside framework APIs. If the plugin confuses these responsibilities, flag it.
 - [ ] **Constants**: Use named constants instead of hardcoded string literals
 - [ ] **Avoid re-reading config**: Don't call `loadData()` (which internally calls `getFile`) repeatedly — read once, cache in a variable, write with `putFile` when needed
 - [ ] **Logging**: Outside of lifecycle functions, only log on errors. `console.log` is acceptable within lifecycle functions (onload, onunload, etc.)
@@ -65,7 +65,7 @@ Inspect the manifest from the extracted `package.zip`. Fields to check:
 - [ ] **Timer cleanup**: Any `setTimeout`/`setInterval` calls must have corresponding `clearTimeout`/`clearInterval` in `onunload()`
 - [ ] **Observer cleanup**: Any `MutationObserver`/`ResizeObserver`/`IntersectionObserver` instances must call `.disconnect()` in `onunload()`
 - [ ] **Network cleanup**: Any WebSocket, EventSource, or persistent network connections must be closed in `onunload()`
-- [ ] **Command registration**: Command keys must be in English; hotkey must use Siyuan format (e.g., `⌥⇧⌘A`), not raw key names like `Ctrl+Alt+C`
+- [ ] **Command registration**: Command keys must be in English; hotkey must use Siyuan format (e.g., `⌥⇧⌘A`), not raw key names like `Ctrl+Alt+C`. Commands registered via `addCommand()` are auto-cleaned by the framework — no manual cleanup needed in `onunload()`.
 - [ ] **Template styles**: `index.scss` must not contain leftover template styles like `.plugin-sample` — only the plugin's own styles
 - [ ] **No `window.location.reload()`**: Must NOT call `window.location.reload()` to reload the UI. Use `fetch('/api/ui/reloadUI')` instead. `window.location.reload()` causes a full browser reload and loses application state; `/api/ui/reloadUI` can automatically save SiYuan's layout information. Detect with `grep -rn 'location\.reload'` or `grep -rn 'window\.location'` on the source.
 - [ ] **Path separators**: All file paths in code must use forward slash `/`, not backslash `\`
