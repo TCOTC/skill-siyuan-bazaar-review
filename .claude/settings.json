@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh api repos/siyuan-note/bazaar/pulls/*)",
+      "Bash(gh api repos/*/* --jq *)",
+      "Bash(gh api users/* --jq *)",
+      "Bash(gh api repos/*/*/releases/latest --jq *)",
+      "Bash(git *)",
+      "Bash(curl *)",
+      "Bash(mkdir *)",
+      "Bash(unzip *)",
+      "Bash(rm *)",
+      "Bash(echo *)",
+      "Bash(cat *)",
+      "Bash(head *)",
+      "Bash(ls *)",
+      "Bash(find *)",
+      "Bash(grep *)",
+      "Bash(cp *)",
+      "Bash(sed *)",
+      "Bash(explorer.exe *)",
+      "Bash(powershell.exe *)",
+      "Bash(wmic *)",
+      "Bash(tasklist *)",
+      "Read(*)",
+      "Grep(*)",
+      "Glob(*)",
+      "Edit(*)",
+      "Write(*)"
+    ]
+  }
+}

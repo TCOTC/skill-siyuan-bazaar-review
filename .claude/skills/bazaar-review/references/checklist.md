@@ -18,7 +18,7 @@ Inspect the manifest from the extracted `package.zip`. Fields to check:
 - [ ] **`name`**: Must match the repository name exactly
 - [ ] **`url`**: Must be the correct GitHub repository URL (`https://github.com/owner/repo`)
 - [ ] **`readme`**: The filenames listed must match actual README files present in the zip
-- [ ] **`displayName`**: Must NOT contain the text `Siyuan` (don't reference the brand name). The `description` field is exempt from this rule.
+- [ ] **`displayName`**: Must NOT contain the text `Siyuan` (don't reference the brand name). The `description` field is exempt from this rule. The locale language should match the corresponding `readme` entry: if a locale's README is Chinese-only, `displayName` for that locale being Chinese is acceptable. Only flag when a locale has its own README file in a different language but `displayName` doesn't match (e.g., `readme.en_US` points to an English README but `displayName.en_US` is Chinese).
 
 ## 2. Icon & Preview — check in [zip]
 
